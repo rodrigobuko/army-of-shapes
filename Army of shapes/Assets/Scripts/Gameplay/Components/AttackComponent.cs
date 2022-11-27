@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AttackComponent : MonoBehaviour
 {
+    [SerializeField] private ParticleSystem _attackParticleSystem;
     
     private UnitComponent _unitComponent;
     private float _attackSpeed;
@@ -23,7 +24,9 @@ public class AttackComponent : MonoBehaviour
         if (!_attacked)
         {
             _attacked = true;
+            
             enemyDamageComponent.TakeDamage(_attackDamage);
+            
         }
         else if(!_attackCooldown)
         {
@@ -34,10 +37,10 @@ public class AttackComponent : MonoBehaviour
 
     private IEnumerator WaitCooldown()
     {
+        //jump 
+        gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up*20f, ForceMode.Impulse);
         yield return new WaitForSeconds(_attackSpeed);
         _attacked = false;
         _attackCooldown = false;
-        
     }
-    
 }

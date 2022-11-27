@@ -11,13 +11,15 @@ public enum UnitStates
 }
 public class BehaviorComponent : MonoBehaviour
 {
-    [SerializeField] private float rangeMovePerception;
-    [SerializeField] private float rangeAttackPerception;
+    [SerializeField] private float rangeMovePerception = 100f;
+    [SerializeField] private float rangeAttackPerception = 4f;
     
     private AttackComponent _attackComponent;
     private MoveComponent _moveComponent;
     private UnitComponent _unitComponent;
     private UnitStates _unitState;
+
+    private bool _unitCanBehave;
 
     // Start is called before the first frame update
     void Start()
@@ -26,11 +28,16 @@ public class BehaviorComponent : MonoBehaviour
         _attackComponent = gameObject.GetComponent<AttackComponent>();
         _moveComponent = gameObject.GetComponent<MoveComponent>();
         _unitComponent = gameObject.GetComponent<UnitComponent>();
+        _unitCanBehave = false;
     }
     
-    void Update()
+    void FixedUpdate()
     {
-        ComputeBehavior();
+        if (_unitCanBehave)
+        {
+            ComputeBehavior();
+        }
+
     }
 
     void ComputeBehavior()
@@ -41,6 +48,7 @@ public class BehaviorComponent : MonoBehaviour
         {
             _attackComponent.Attack(enemyAttackFoundTuple.Item2.GetComponent<DamageComponent>());
             _unitState = UnitStates.Attacking;
+            _moveComponent.Stop();
         }
         else
         {
@@ -48,37 +56,25 @@ public class BehaviorComponent : MonoBehaviour
             Tuple<bool, Collider> enemyMoveFoundTuple = CheckEnemyMovePerceived();
             if (enemyMoveFoundTuple.Item1)
             {
-                _moveComponent.MoveTo(enemyMoveFoundTuple.Item2.transform.position);
+                //_moveComponent.MoveTo(enemyMoveFoundTuple.Item2.transform.position);
+                _moveComponent.FollowTargetWithRotation(enemyMoveFoundTuple.Item2.transform, rangeAttackPerception-0.5f);
                 _unitState = UnitStates.Moving;
             }
             else
             {
                 // unit is on Idle
                 _unitState = UnitStates.Idle;
+                _moveComponent.Stop();
             }
         }
-        
-        // switch (_unitState)
-        // {
-        //     case UnitStates.Idle:
-        //         Debug.Log("Idle");
-        //         break;
-        //     case UnitStates.Moving:
-        //         Debug.Log("Moving");
-        //         break;
-        //     case UnitStates.Attacking:
-        //         Debug.Log("Attacking");
-        //         break;
-        // }
     }
 
     Tuple<bool, Collider> CheckEnemyMovePerceived()
     {
         bool findEnemy = false;
         Collider enemyCollider = null;
-        //RaycastHit[] hits = Physics.SphereCastAll(transform.position, 1f, Vector3.up, 200f, _unitComponent.GetEnemyArmyLayerMask());
-        
-        Collider[] colliders = Physics.OverlapSphere(transform.position, 100f, layerMask: _unitComponent.GetEnemyArmyLayerMask());
+
+        Collider[] colliders = Physics.OverlapSphere(transform.position, rangeMovePerception, layerMask: _unitComponent.GetEnemyArmyLayerMask());
         float minDistance = float.MaxValue;
         foreach (var collider in colliders)
         {
@@ -98,7 +94,7 @@ public class BehaviorComponent : MonoBehaviour
     {
         bool findEnemy = false;
         Collider collider = null;
-        RaycastHit[] hits = Physics.SphereCastAll(transform.position, 2f, Vector3.up, 3f, _unitComponent.GetEnemyArmyLayerMask());
+        RaycastHit[] hits = Physics.SphereCastAll(transform.position, rangeAttackPerception, Vector3.up, rangeAttackPerception+1f, _unitComponent.GetEnemyArmyLayerMask());
         switch (_unitComponent.GetTypeOfAttack())
         {
             case TypeOfAttack.AttackClosest:
@@ -136,5 +132,10 @@ public class BehaviorComponent : MonoBehaviour
         // Draw a yellow sphere at the transform's position
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(transform.position, 200f);
+    }
+
+    public void EnableBehavior()
+    {
+        _unitCanBehave = true;
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Cinemachine;
 using UnityEngine;
 using Random = System.Random;
 
 public class ArmyGenerator : MonoBehaviour
 {
+    [Header("Armies Presets")]
     [SerializeField] private int numberOfUnitsInArmy;
 
     [SerializeField] private List<Renderer> _armiesPlaces;
@@ -13,42 +16,70 @@ public class ArmyGenerator : MonoBehaviour
 
     [SerializeField] private GameObject Cube;
     [SerializeField] private GameObject Sphere;
-    [SerializeField] private float OffesetX = 5.0f;
+    
+    [SerializeField] private GameObject _board;
 
+    [Header("Camera")] [SerializeField] public CinemachineTargetGroup TargetGroup;
+    [SerializeField] private CinemachineVirtualCamera _virtualCamera;
+
+    [Header("UI")] 
+    [SerializeField] private Canvas _canvas;
+    
+    [Header("Gameplay")] 
+    [SerializeField] private GameType _gameType;
+    [SerializeField] private PlayerScore _playerScore;
+    
+    private Camera _mainCamera;
     private List<Army> armies;
+    private ArmyBattleUI _armyBattleUI;
 
     private void Start()
     {
         armies = new List<Army>();
+        _mainCamera = Camera.main;
+        _virtualCamera.LookAt = _board.transform;
+        _armyBattleUI = gameObject.GetComponent<ArmyBattleUI>();
+        _armyBattleUI.Setup(_gameType.TypeOfGame);
+        if (_gameType.TypeOfGame == TypeOfGame.BetBattle)
+        {
+            GenerateArmy();
+        }
     }
 
     public void GenerateArmy()
     {
         DeletePreviousArmies();
+        _virtualCamera.LookAt = TargetGroup.transform;
+        TargetGroup.RemoveMember(_board.transform);
+        
         UnitGenerator unitGenerator = gameObject.GetComponent<UnitGenerator>();
-        int layerArmyIndex = 0;
+        int armyNumber = 0;
+       
         foreach (var location in _armiesPlaces)
         {
-            Army newArmy = CreateArmy(layerArmyIndex);
+            Army newArmy = CreateArmy(armyNumber);
             armies.Add(newArmy);
-            float offset = 0.0f;
             for (int i = 0; i < numberOfUnitsInArmy; i++)
             {
                 Unit unit = unitGenerator.GenerateUnit();
                 GameObject unitGameObject = CreateUnit(unit, transform, GetLocation(location));
-                
+                unitGameObject.GetComponent<DamageComponent>().SetUpHealthBar(_canvas, _mainCamera);
+                unitGameObject.GetComponent<UnitComponent>().SetEnemyArmyName(armyNumber+1, _mainCamera);
                 newArmy.AddUnit(unit);
                 newArmy.AddUnityObject(unitGameObject);
+                TargetGroup.AddMember(unitGameObject.transform, 1, 2);
             }
 
-            layerArmyIndex++;
+            armyNumber++;
         }
+        
+        _armyBattleUI.SetArmies(armies);
     }
 
-    private Army CreateArmy(int layerArmyIndex)
+    private Army CreateArmy(int armyNumber)
     {
-        Army newArmy = new Army();
-        if (layerArmyIndex == 0)
+        Army newArmy = new Army(armyNumber);
+        if (armyNumber == 0)
         {
             newArmy.SetLayers(_armiesLayerMasks[0], _armiesLayerMasks[1]);
         }
@@ -78,7 +109,7 @@ public class ArmyGenerator : MonoBehaviour
         
         unitCreated.GetComponent<UnitComponent>().AttachUnit(unit);
         unitCreated.transform.position = position;
-
+        
         return unitCreated;
     }
 
@@ -88,10 +119,15 @@ public class ArmyGenerator : MonoBehaviour
         {
             foreach (var unitGameObject in army.UnitGameObjects)
             {
+                TargetGroup.RemoveMember(unitGameObject.transform);
                 Destroy(unitGameObject);
             }
             army.DeleteArmy();
         }
+        foreach (Transform child in _canvas.transform) {
+            Destroy(child.gameObject);
+        }
+        armies.Clear();
     }
 
     Vector3 GetLocation(Renderer armyPlace)
@@ -106,5 +142,49 @@ public class ArmyGenerator : MonoBehaviour
         
         Vector3 position = new Vector3(UnityEngine.Random.Range(minX, maxX), 0, UnityEngine.Random.Range(minZ, maxZ));
         return position;
+    }
+
+    public void CheckWinner()
+    {
+        _armyBattleUI.UpdateArmyNumber();
+        List<Army> armiesToRemove = new List<Army>();
+        foreach (Army army in armies)
+        {
+            int unitsAlive = army.AliveUnits();
+            if (unitsAlive == 0)
+            {
+                Debug.Log($"Army {army.ArmyNumber} DEFEATED");
+                armiesToRemove.Add(army);
+            }
+        }
+
+        foreach (Army armyToRemove in armiesToRemove)
+        {
+            armies.Remove(armyToRemove);
+        }
+
+        if (armies.Count == 1)
+        {
+            Debug.Log($"Army {armies.First().ArmyNumber} WON");
+            if (_gameType.TypeOfGame == TypeOfGame.BetBattle)
+            {
+                _armyBattleUI.EndBetBattle(armies.First(), _playerScore);
+            }
+            else
+            {
+                _armyBattleUI.EndBattle(armies.First());
+            }
+            
+            TargetGroup.AddMember(_board.transform, 100, 100);
+        }
+            
+    }
+
+    public void GenerateArmisAfterBet()
+    {
+        if (_gameType.TypeOfGame == TypeOfGame.BetBattle)
+        {
+            GenerateArmy();
+        }
     }
 }

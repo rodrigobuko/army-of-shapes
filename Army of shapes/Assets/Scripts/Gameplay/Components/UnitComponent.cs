@@ -2,15 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UnitComponent : MonoBehaviour
 {
     private Unit _unit;
+    private bool _isDead;
     private int _enemyArmyLayerMask;
+    [SerializeField] private TextMesh _armyTag;
 
     private void Start()
     {
-        Debug.Log("Oi fui uma unidade criada");
+        _isDead = false;
     }
 
     public void AttachUnit(Unit unit)
@@ -23,6 +26,17 @@ public class UnitComponent : MonoBehaviour
     {
         _enemyArmyLayerMask = enemyArmyLayerMask;
     }
+    
+    public void SetEnemyArmyName(int armyNumber, Camera camera)
+    {
+        _armyTag.text = $"{armyNumber}";
+        _armyTag.color = armyNumber == 1 ? Color.red : Color.cyan;
+        if (_armyTag.TryGetComponent<FaceCamera>(out FaceCamera faceCamera))
+        {
+            faceCamera.Camera = camera;
+            faceCamera.enabled = true;
+        }
+    }
 
     private void SetupGameObejectWithUnit()
     {
@@ -32,6 +46,10 @@ public class UnitComponent : MonoBehaviour
 
     public float GetSpeed()
     {
+        if (_unit.Speed <=0)
+        {
+            return 1f;
+        }
         return _unit.Speed;
     }
     
@@ -64,4 +82,11 @@ public class UnitComponent : MonoBehaviour
     {
         return 1<<_enemyArmyLayerMask;
     }
+
+    public void KillUnit()
+    {
+        _isDead = true;
+    }
+
+    public bool IsDead => _isDead;
 }

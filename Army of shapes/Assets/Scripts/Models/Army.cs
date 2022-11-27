@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Army
 {
+    private int _armyNumber;
+
+    public int ArmyNumber => _armyNumber;
+
     private List<Unit> _units;
     private List<GameObject> _unitGameObjects;
     
@@ -12,8 +16,10 @@ public class Army
 
     private int _armyLayerMask;
     private int _enemyArmyLayerMask;
-    public Army()
+    public Army(int armyNumber)
     {
+        // to start with one
+        _armyNumber = armyNumber+1;
         _units = new List<Unit>();
         _unitGameObjects = new List<GameObject>();
     }
@@ -45,5 +51,16 @@ public class Army
     {
         _units = new List<Unit>();
         _unitGameObjects = new List<GameObject>();
+    }
+
+    public int AliveUnits()
+    {
+        int count = 0;
+        foreach (var gameObject in _unitGameObjects)
+        {
+            count += gameObject.GetComponent<UnitComponent>().IsDead? 0 : 1;
+        }
+
+        return count;
     }
 }

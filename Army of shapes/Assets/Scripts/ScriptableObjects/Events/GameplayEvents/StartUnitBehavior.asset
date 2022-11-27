@@ -9,11 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a63776e6374a54ec3a256b0ece767361, type: 3}
-  m_Name: Small
+  m_Script: {fileID: 11500000, guid: 8bbb491e473eb4db2938b6aa767bfefc, type: 3}
+  m_Name: StartUnitBehavior
   m_EditorClassIdentifier: 
-  ChangeOnHealth: -50
-  ChangeOnAttack: 0
-  ChangeOnSpeed: 0
-  ChangeOnAttackSpeed: 0
-  Scale: 0.75

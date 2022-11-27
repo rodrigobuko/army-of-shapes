@@ -6895,7 +6895,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1152172865}
   - component: {fileID: 1152172864}
-  - component: {fileID: 1152172866}
   - component: {fileID: 1152172867}
   - component: {fileID: 1152172868}
   - component: {fileID: 1152172870}
@@ -6949,29 +6948,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1152172866
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1152172863}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f23172a9e1574d2da0fbc802e5dee9e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _defaultBuff: {fileID: 11400000, guid: 63c2a341a3ff943528bf3a21a16354ca, type: 2}
-  _shapeBuffs:
-  - {fileID: 11400000, guid: 3b291eb271ed4477183cf8af43f207f6, type: 2}
-  - {fileID: 11400000, guid: 6c1fed766aee347409c664a26bd6b799, type: 2}
-  _colorBuffs:
-  - {fileID: 11400000, guid: a7ec865e853a24d128f182b91179c844, type: 2}
-  - {fileID: 11400000, guid: d9f62c470545b456d842832906d5d95c, type: 2}
-  - {fileID: 11400000, guid: f9ae60e481d4546b4a6337dfc674e2e7, type: 2}
-  _sizeBuffs:
-  - {fileID: 11400000, guid: 9229d0060493541799479c4f45485d8e, type: 2}
-  - {fileID: 11400000, guid: a0d860757aa444158875f7e5c87497a8, type: 2}
 --- !u!114 &1152172867
 MonoBehaviour:
   m_ObjectHideFlags: 0

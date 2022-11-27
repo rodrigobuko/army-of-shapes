@@ -28,7 +28,7 @@ public class ArmyGenerator : MonoBehaviour
     [Header("Gameplay")] 
     [SerializeField] private GameType _gameType;
     [SerializeField] private PlayerScore _playerScore;
-    
+
     private Camera _mainCamera;
     private List<Army> armies;
     private ArmyBattleUI _armyBattleUI;
@@ -52,7 +52,7 @@ public class ArmyGenerator : MonoBehaviour
         _virtualCamera.LookAt = TargetGroup.transform;
         TargetGroup.RemoveMember(_board.transform);
         
-        UnitGenerator unitGenerator = gameObject.GetComponent<UnitGenerator>();
+        //UnitGenerator unitGenerator = gameObject.GetComponent<UnitGenerator>();
         int armyNumber = 0;
        
         foreach (var location in _armiesPlaces)
@@ -61,7 +61,7 @@ public class ArmyGenerator : MonoBehaviour
             armies.Add(newArmy);
             for (int i = 0; i < numberOfUnitsInArmy; i++)
             {
-                Unit unit = unitGenerator.GenerateUnit();
+                Unit unit = _gameType.UnitGenerator.GenerateUnit();
                 GameObject unitGameObject = CreateUnit(unit, transform, GetLocation(location));
                 unitGameObject.GetComponent<DamageComponent>().SetUpHealthBar(_canvas, _mainCamera);
                 unitGameObject.GetComponent<UnitComponent>().SetEnemyArmyName(armyNumber+1, _mainCamera);

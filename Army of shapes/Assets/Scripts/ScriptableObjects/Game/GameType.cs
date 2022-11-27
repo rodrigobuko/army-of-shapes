@@ -11,8 +11,9 @@ public enum TypeOfGame
 public class GameType : ScriptableObject
 {
     private TypeOfGame _typeOfGame;
-
     public TypeOfGame TypeOfGame => _typeOfGame;
+    
+    public UnitGeneratorSO UnitGenerator;
     
     public void SetGameType(TypeOfGame gameType)
     {
